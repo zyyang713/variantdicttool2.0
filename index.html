@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>異體字字典字圖查詢系統</title>
+  <style>
+    @font-face {
+      font-family: 'chongxi_seal';
+      src: url('fonts/chongxi_seal.otf') format('opentype');
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background-color: #f9f9f9;
+	  background: url('banner.png') no-repeat center top;
+      background-size: cover;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 2em;
+    }
+
+    h1#mainTitle {
+      font-family: 'chongxi_seal', sans-serif;
+      color: #2C405A;
+      font-size: 4em;
+      font-weight: normal;
+      text-align: center;
+      margin-bottom: 1em;
+      cursor: pointer;
+      transition: font-size 0.4s ease;
+    }
+
+    .small-title {
+      font-size: 2em !important;
+    }
+
+    .search-panel {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 1.5em 2em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+      max-width: 960px;
+      margin: 0 auto 2em auto;
+    }
+
+    input, button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    input:focus {
+      border-color: #7a9cf2;
+      background-color: #f0f8ff;
+      outline: none;
+    }
+
+    button {
+      background-color: #f2a39c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e58f88;
+    }
+
+    #arrow-indicator {
+      display: none;
+      text-align: center;
+      margin-bottom: 1em;
+      font-size: 1.4em;
+      color: #666;
+    }
+
+    #image-container {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row-reverse;
+      justify-content: center;
+      gap: 1.2em;
+    }
+
+    .image-box {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      width: 200px;
+      padding: 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .image-box img {
+      max-width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+
+    .id-label {
+      font-size: 0.95em;
+      color: #555;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 0.5em;
+    }
+
+    .error-text {
+      color: #d9534f;
+      background-color: #fff5f5;
+      padding: 1em;
+      font-weight: bold;
+      font-size: 0.9em;
+      text-align: center;
+      border: 1px dashed #d9534f;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .search-panel {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="mainTitle" onclick="resetPage()">異體字字典<br>字圖查詢系統</h1>
+
+  <div class="search-panel">
+    <label for="bookCode">書籍代號：</label>
+    <input list="bookCodeList" id="bookCode" placeholder="例如 002">
+
+    <label for="imageId">字圖ID（空格分隔）：</label>
+    <input type="text" id="imageId" placeholder="例如 1492208 1492210">
+
+    <button onclick="searchImages()">查詢</button>
+  </div>
+
+  <datalist id="bookCodeList">
+    <option value="001">001－說文解字（大徐本）
+    <option value="002">002－說文解字（段注本）
+    <option value="003">003－校正甲骨文編（甲骨文編）
+    <option value="004">004－甲骨文字集釋
+    <option value="005">005－金文編
+    <option value="006">006－古文字類編
+    <option value="007">007－漢語古文字字形表
+    <option value="008">008－漢簡文字類編
+    <option value="009">009－古璽文編
+    <option value="010">010－漢隸字源
+    <option value="011">011－隸辨
+    <option value="012">012－金石文字辨異
+    <option value="013">013－偏類碑別字
+    <option value="014">014－碑別字新編
+    <option value="015">015－玉篇零卷
+    <option value="016">016－六朝別字記新編
+    <option value="017">017－敦煌俗字譜
+    <option value="018">018－干祿字書
+    <option value="019">019－五經文字
+    <option value="020">020－新加九經字樣
+    <option value="021">021－龍龕手鏡（高麗本）
+    <option value="022">022－龍龕手鑑
+    <option value="023">023－佩觿
+    <option value="024">024－玉篇（元刊本）
+    <option value="025">025－廣韻
+    <option value="026">026－集韻
+    <option value="027">027－集韻考正
+    <option value="028">028－類篇
+    <option value="029">029－精嚴新集大藏音
+    <option value="030">030－四聲篇海（明刊本）
+    <option value="031">031－字鑑
+    <option value="032">032－六書正譌
+    <option value="033">033－宋元以來俗字譜
+    <option value="034">034－俗書刊誤
+    <option value="035">035－字學三正
+    <option value="036">036－字彙
+    <option value="037">037－正字通
+    <option value="038">038－字彙補
+    <option value="039">039－康熙字典（校正本）
+    <option value="040">040－康熙字典（新修本）
+    <option value="041">041－經典文字辨證書
+    <option value="042">042－增廣字學舉隅
+    <option value="043">043－古今正俗字詁
+    <option value="044">044－字辨
+    <option value="045">045－彙音寶鑑
+    <option value="046">046－異體字手冊
+    <option value="047">047－大陸簡化字表
+    <option value="048">048－角川漢和辭典
+    <option value="049">049－韓國基礎漢字表
+    <option value="050">050－中日朝漢字字形對照
+    <option value="051">051－中文大辭典（十冊本）
+    <option value="052">052－漢語大字典
+    <option value="053">053－中國書法大字典
+    <option value="054">054－草書大字典
+    <option value="055">055－學生簡體字字典
+    <option value="056">056－簡體字表
+    <option value="057">057－佛教難字字典
+    <option value="058">058－中華字海
+    <option value="059">059－古文四聲韻
+    <option value="060">060－國字標準字體宋體母稿
+    <option value="061">061－歷代書法字彙
+    <option value="062">062－重訂直音篇
+    <option value="063">063－異體字表
+
+  </datalist>
+
+	<div id="arrow-indicator" style="
+	  display: none;
+	  margin: 0 auto 1.5em auto;
+	  padding: 0.5em 1em;
+	  background-color: #ffe4d9;
+	  color: #cc6b5a;
+	  border: 1px solid #f2a39c;
+	  border-radius: 8px;
+	  font-size: 0.9em;
+	  font-weight: bold;
+	  width: fit-content;
+	  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+	">
+	  ← 由右至左排列
+	</div>
+
+
+	<div id="image-container"></div>
+
+  <script>
+    const imageIdInput = document.getElementById("imageId");
+    imageIdInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        searchImages();
+      }
+    });
+
+    function searchImages() {
+      document.getElementById("mainTitle").classList.add("small-title");
+
+      // 顯示箭頭提示
+      document.getElementById("arrow-indicator").style.display = "block";
+
+      const bookCode = document.getElementById("bookCode").value.trim();
+      const imageInput = document.getElementById("imageId").value.trim();
+      const imageContainer = document.getElementById("image-container");
+      imageContainer.innerHTML = "";
+
+      const isValidBook = /^[0-9]{3}$/.test(bookCode);
+      if (!isValidBook) {
+        alert("請輸入正確的三位數書籍代號！");
+        return;
+      }
+
+      const imageIds = imageInput.split(/\s+/).filter(id => id.length > 0);
+      if (imageIds.length === 0) {
+        alert("請輸入至少一筆七位數字圖ID！");
+        return;
+      }
+
+      imageIds.forEach(imageId => {
+        const box = document.createElement("div");
+        box.className = "image-box";
+
+        if (!/^[0-9]{7}$/.test(imageId)) {
+          box.innerHTML = `<div class="error-text">❌ ${imageId} 不是有效的7位數</div>`;
+          imageContainer.appendChild(box);
+          return;
+        }
+
+        const imageUrl = `https://dict.variants.moe.edu.tw/book_piece/${bookCode}/${imageId}.png`;
+
+        const idLabel = document.createElement("div");
+        idLabel.className = "id-label";
+        idLabel.textContent = imageId;
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = `字圖 ${imageId}`;
+
+        img.onerror = function () {
+          box.innerHTML = `<div class="error-text">⚠️ ${imageId}：找不到圖片</div>`;
+        };
+
+        box.appendChild(idLabel);
+        box.appendChild(img);
+        imageContainer.appendChild(box);
+      });
+    }
+
+    function resetPage() {
+      document.getElementById("mainTitle").classList.remove("small-title");
+      document.getElementById("imageId").value = "";
+      document.getElementById("image-container").innerHTML = "";
+      document.getElementById("arrow-indicator").style.display = "none";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>
