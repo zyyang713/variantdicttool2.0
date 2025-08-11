@@ -12,7 +12,7 @@
     body {
       font-family: "Noto Sans TC", sans-serif;
       background-color: #f9f9f9;
-	  background: url('banner.png') no-repeat center top;
+      background: url('banner.png') no-repeat center top;
       background-size: cover;
       background-attachment: fixed;
       margin: 0;
@@ -30,9 +30,7 @@
       transition: font-size 0.4s ease;
     }
 
-    .small-title {
-      font-size: 2em !important;
-    }
+    .small-title { font-size: 2em !important; }
 
     .search-panel {
       background-color: #fff;
@@ -69,9 +67,7 @@
       transition: background-color 0.3s;
     }
 
-    button:hover {
-      background-color: #e58f88;
-    }
+    button:hover { background-color: #e58f88; }
 
     #arrow-indicator {
       display: none;
@@ -126,9 +122,54 @@
     }
 
     @media (max-width: 600px) {
-      .search-panel {
-        flex-direction: column;
-      }
+      .search-panel { flex-direction: column; }
+      body { padding: 1.25em; }
+    }
+
+    /* ===== 回到頂端懸浮按鈕 ===== */
+    #backToTop {
+      position: fixed;
+      right: max(24px, env(safe-area-inset-right));
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      z-index: 9999;
+      width: 56px;
+      height: 56px;
+      border: none;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+
+      /* 初始隱藏，用透明度與位移做過場效果 */
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    #backToTop.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+	#backToTop img {
+	  width: 300%;
+	  height: 300%;
+	  object-fit: contain; /* 保持比例完整顯示 */
+	  border-radius: 50%; /* 保持圓形 */
+	  background-color: transparent; /* 補滿空白背景，可改透明 */
+	  display: block;
+	  user-select: none;
+	  -webkit-user-drag: none;
+	}
+
+    #backToTop:focus { outline: 2px solid #e58f88; outline-offset: 2px; }
+    #backToTop:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.16); }
+    @media (prefers-reduced-motion: reduce) {
+      #backToTop { transition: none; }
+      html { scroll-behavior: auto; }
     }
   </style>
 </head>
@@ -210,40 +251,39 @@
     <option value="061">061－歷代書法字彙
     <option value="062">062－重訂直音篇
     <option value="063">063－異體字表
-
   </datalist>
 
-	<div id="arrow-indicator" style="
-	  display: none;
-	  margin: 0 auto 1.5em auto;
-	  padding: 0.5em 1em;
-	  background-color: #ffe4d9;
-	  color: #cc6b5a;
-	  border: 1px solid #f2a39c;
-	  border-radius: 8px;
-	  font-size: 0.9em;
-	  font-weight: bold;
-	  width: fit-content;
-	  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-	">
-	  ← 由右至左排列
-	</div>
+  <div id="arrow-indicator" style="
+    display: none;
+    margin: 0 auto 1.5em auto;
+    padding: 0.5em 1em;
+    background-color: #ffe4d9;
+    color: #cc6b5a;
+    border: 1px solid #f2a39c;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: bold;
+    width: fit-content;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  ">
+    ← 由右至左排列
+  </div>
 
+  <div id="image-container"></div>
 
-	<div id="image-container"></div>
+  <!-- 回到頂端懸浮按鈕：把 src 換成你的 PNG -->
+  <button id="backToTop" aria-label="回到頁面頂端" title="回到頂端">
+    <img src="to-top.png" alt="" />
+  </button>
 
   <script>
     const imageIdInput = document.getElementById("imageId");
     imageIdInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        searchImages();
-      }
+      if (event.key === "Enter") searchImages();
     });
 
     function searchImages() {
       document.getElementById("mainTitle").classList.add("small-title");
-
-      // 顯示箭頭提示
       document.getElementById("arrow-indicator").style.display = "block";
 
       const bookCode = document.getElementById("bookCode").value.trim();
@@ -252,16 +292,10 @@
       imageContainer.innerHTML = "";
 
       const isValidBook = /^[0-9]{3}$/.test(bookCode);
-      if (!isValidBook) {
-        alert("請輸入正確的三位數書籍代號！");
-        return;
-      }
+      if (!isValidBook) { alert("請輸入正確的三位數書籍代號！"); return; }
 
       const imageIds = imageInput.split(/\s+/).filter(id => id.length > 0);
-      if (imageIds.length === 0) {
-        alert("請輸入至少一筆七位數字圖ID！");
-        return;
-      }
+      if (imageIds.length === 0) { alert("請輸入至少一筆七位數字圖ID！"); return; }
 
       imageIds.forEach(imageId => {
         const box = document.createElement("div");
@@ -300,6 +334,33 @@
       document.getElementById("arrow-indicator").style.display = "none";
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // ===== 回到頂端按鈕：顯示/隱藏與點擊動作 =====
+    const backBtn = document.getElementById('backToTop');
+
+    // 監聽滾動，超過 200px 顯示
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        backBtn.classList.add('visible');
+      } else {
+        backBtn.classList.remove('visible');
+      }
+    }, { passive: true });
+
+    // 點擊回到頂端（支援鍵盤 Enter/Space）
+    function scrollToTopSmooth() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    backBtn.addEventListener('click', scrollToTopSmooth);
+    backBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        scrollToTopSmooth();
+      }
+    });
+
+    // 若一開始就位於頂端以外的位置（例如重新載入在中段），立即判斷一次
+    if (window.scrollY > 200) backBtn.classList.add('visible');
   </script>
 
 </body>
